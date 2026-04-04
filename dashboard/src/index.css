@@ -1,0 +1,151 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cream: #FAF7F2;
+  --cream-dark: #F0EAE0;
+  --green: #2D6A4F;
+  --green-light: #40916C;
+  --green-pale: #D8F3DC;
+  --gold: #C9972C;
+  --gold-pale: #FDF3DC;
+  --terra: #C4724A;
+  --terra-pale: #FBEEE7;
+  --dark: #2C2416;
+  --mid: #6B5B45;
+  --border: #DDD3C2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--cream);
+  color: var(--dark);
+  font-family: 'DM Sans', Inter, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hebrew text — right to left */
+.rtl {
+  direction: rtl;
+  text-align: right;
+  font-family: 'DM Sans', 'Arial Hebrew', sans-serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--cream-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--mid);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.fade-in   { animation: fadeIn 0.3s ease forwards; }
+.slide-up  { animation: slideUp 0.4s ease forwards; }
+
+/* Loading shimmer */
+.shimmer {
+  background: linear-gradient(90deg, var(--cream-dark) 25%, var(--cream) 50%, var(--cream-dark) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Gold button */
+.btn-gold {
+  background: var(--gold);
+  color: white;
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-gold:hover {
+  background: #b8861e;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(201, 151, 44, 0.3);
+}
+.btn-gold:active {
+  transform: translateY(0);
+}
+.btn-gold:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Green button */
+.btn-green {
+  background: var(--green);
+  color: white;
+  font-weight: 500;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-green:hover {
+  background: var(--green-light);
+}
+
+/* Ghost button */
+.btn-ghost {
+  background: transparent;
+  color: var(--mid);
+  font-weight: 500;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.btn-ghost:hover {
+  border-color: var(--mid);
+  color: var(--dark);
+}
+
+/* Card */
+.card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 1.25rem;
+  box-shadow: 0 1px 4px rgba(44, 36, 22, 0.06);
+}
+
+/* Tab active state */
+.tab-active {
+  color: var(--green);
+  border-bottom: 2px solid var(--green);
+}
