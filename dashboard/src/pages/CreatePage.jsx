@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { apiFetch } from '../api.js'
 import { PILLARS, FORMATS, theme } from '../theme.js'
 import PillarBadge from '../components/PillarBadge.jsx'
+import ImageGenerator from '../components/ImageGenerator.jsx'
 
 const MODES = [
   { id: 'autopilot', label: 'Autopilot', emoji: '🤖', desc: 'AI writes everything' },
@@ -612,6 +613,9 @@ export default function CreatePage({ active, onGoToLibrary }) {
               )}
             </div>
           )}
+
+          {/* Image Generator */}
+          <ImageGenerator result={result} pillarId={pillar} format={format} />
 
           {/* Action row */}
           <div className="flex gap-3 mt-6">

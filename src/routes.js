@@ -6,6 +6,7 @@ const express = require('express');
 const router = express.Router();
 const { generatePost, generateWaterfall, runGSB } = require('./claude');
 const { searchKB } = require('./kb');
+const { generateQuoteTile, generateSceneImage } = require('./image');
 
 // ─── HEALTH ────────────────────────────────────────────────────────────────────
 
@@ -108,6 +109,34 @@ router.get('/kb/search', async (req, res) => {
 
   const result = await searchKB(q);
   res.json(result);
+});
+
+// ─── IMAGE GENERATION ──────────────────────────────────────────────────────────
+
+/**
+ * POST /api/generate-image
+ * Body: { type, visualDirection, pillar, quote? }
+ * type: 'tile' → Ideogram v2 | 'scene' → fal.ai FLUX Pro
+ */
+router.post('/generate-image', async (req, res) => {
+  const { type, visualDirection, pillar, quote } = req.body;
+
+  if (!visualDirection) {
+    return res.status(400).json({ error: 'visualDirection is required' });
+  }
+
+  try {
+    let result;
+    if (type === 'tile') {
+      result = await generateQuoteTile({ visualDirection, pillar, quote });
+    } else {
+      result = await generateSceneImage({ visualDirection, pillar });
+    }
+    res.json(result);
+  } catch (e) {
+    console.error('[generate-image] Error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 module.exports = router;
