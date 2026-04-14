@@ -7,6 +7,7 @@ const router = express.Router();
 const { generatePost, generateWaterfall, runGSB } = require('./claude');
 const { searchKB } = require('./kb');
 const { generateQuoteTile, generateSceneImage } = require('./image');
+const { savePost, updatePostStatus, listPosts } = require('./notion');
 
 // ─── HEALTH ────────────────────────────────────────────────────────────────────
 
@@ -135,6 +136,58 @@ router.post('/generate-image', async (req, res) => {
     res.json(result);
   } catch (e) {
     console.error('[generate-image] Error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ─── LIBRARY — Notion-backed ────────────────────────────────────────────────────
+
+/**
+ * GET /api/library
+ * Returns all posts from Notion, sorted newest first.
+ */
+router.get('/library', async (req, res) => {
+  try {
+    const posts = await listPosts();
+    res.json({ posts });
+  } catch (e) {
+    console.error('[library] list error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+/**
+ * POST /api/library/save
+ * Body: post object (from CreatePage after generation)
+ * Saves to Notion. Returns { notionPageId }.
+ */
+router.post('/library/save', async (req, res) => {
+  const post = req.body;
+  if (!post || !post.intent) {
+    return res.status(400).json({ error: 'post object with intent is required' });
+  }
+  try {
+    const notionPageId = await savePost(post);
+    res.json({ success: true, notionPageId });
+  } catch (e) {
+    console.error('[library] save error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+/**
+ * PATCH /api/library/:notionPageId/status
+ * Body: { status: 'draft' | 'ready' | 'posted' }
+ */
+router.patch('/library/:notionPageId/status', async (req, res) => {
+  const { notionPageId } = req.params;
+  const { status } = req.body;
+  if (!status) return res.status(400).json({ error: 'status is required' });
+  try {
+    await updatePostStatus(notionPageId, status);
+    res.json({ success: true });
+  } catch (e) {
+    console.error('[library] status update error:', e.message);
     res.status(500).json({ error: e.message });
   }
 });

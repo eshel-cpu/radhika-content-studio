@@ -37,6 +37,7 @@ export default function CreatePage({ active, onGoToLibrary }) {
 
   // ── Copied state
   const [copied, setCopied] = useState('')
+  const [saving, setSaving] = useState(false)
 
   async function handleGenerate() {
     if (!pillar || !format || !intent.trim()) return
@@ -72,8 +73,8 @@ export default function CreatePage({ active, onGoToLibrary }) {
     })
   }
 
-  function handleSaveToLibrary() {
-    if (!result) return
+  async function handleSaveToLibrary() {
+    if (!result || saving) return
     const post = {
       id: Date.now().toString(),
       pillar,
@@ -83,11 +84,25 @@ export default function CreatePage({ active, onGoToLibrary }) {
       status: 'draft',
       createdAt: new Date().toISOString(),
     }
-    const existing = JSON.parse(localStorage.getItem('radhikaLibrary') || '[]')
-    localStorage.setItem('radhikaLibrary', JSON.stringify([post, ...existing]))
-    // Flash confirmation
-    setCopied('saved')
-    setTimeout(() => setCopied(''), 2000)
+    setSaving(true)
+    try {
+      const res = await apiFetch('/api/library/save', {
+        method: 'POST',
+        body: JSON.stringify(post),
+      })
+      if (res && res.ok) {
+        setCopied('saved')
+        setTimeout(() => setCopied(''), 3000)
+      } else {
+        setCopied('error')
+        setTimeout(() => setCopied(''), 3000)
+      }
+    } catch (e) {
+      setCopied('error')
+      setTimeout(() => setCopied(''), 3000)
+    } finally {
+      setSaving(false)
+    }
   }
 
   function handleReset() {
@@ -328,10 +343,11 @@ export default function CreatePage({ active, onGoToLibrary }) {
             <div className="flex gap-2">
               <button
                 onClick={handleSaveToLibrary}
+                disabled={saving}
                 className="btn-ghost text-sm"
-                style={{ padding: '0.4rem 0.875rem', fontSize: '0.85rem' }}
+                style={{ padding: '0.4rem 0.875rem', fontSize: '0.85rem', opacity: saving ? 0.6 : 1 }}
               >
-                {copied === 'saved' ? '✓ Saved!' : '📚 Save'}
+                {saving ? '⏳ Saving...' : copied === 'saved' ? '✓ Saved!' : copied === 'error' ? '⚠️ Error' : '📚 Save'}
               </button>
               <button
                 onClick={handleReset}
@@ -621,9 +637,11 @@ export default function CreatePage({ active, onGoToLibrary }) {
           <div className="flex gap-3 mt-6">
             <button
               onClick={handleSaveToLibrary}
+              disabled={saving}
               className="btn-green flex-1"
+              style={{ opacity: saving ? 0.7 : 1 }}
             >
-              {copied === 'saved' ? '✓ Saved to Library!' : '📚 Save to Library'}
+              {saving ? '⏳ Saving to Notion...' : copied === 'saved' ? '✓ Saved to Library!' : copied === 'error' ? '⚠️ Save failed — retry' : '📚 Save to Library'}
             </button>
             <button onClick={handleReset} className="btn-ghost flex-1">
               ← New Post
