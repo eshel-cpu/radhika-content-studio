@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="100" fill="#FAF7F2"/>
+  <!-- Lotus flower -->
+  <g transform="translate(256,256)">
+    <!-- Petals -->
+    <ellipse cx="0" cy="-80" rx="28" ry="55" fill="#c084fc" opacity="0.9"/>
+    <ellipse cx="0" cy="-80" rx="28" ry="55" fill="#c084fc" opacity="0.9" transform="rotate(45)"/>
+    <ellipse cx="0" cy="-80" rx="28" ry="55" fill="#c084fc" opacity="0.9" transform="rotate(90)"/>
+    <ellipse cx="0" cy="-80" rx="28" ry="55" fill="#c084fc" opacity="0.9" transform="rotate(135)"/>
+    <ellipse cx="0" cy="-80" rx="28" ry="55" fill="#e9d5ff" opacity="0.8" transform="rotate(22.5)"/>
+    <ellipse cx="0" cy="-80" rx="28" ry="55" fill="#e9d5ff" opacity="0.8" transform="rotate(67.5)"/>
+    <ellipse cx="0" cy="-80" rx="28" ry="55" fill="#e9d5ff" opacity="0.8" transform="rotate(112.5)"/>
+    <ellipse cx="0" cy="-80" rx="28" ry="55" fill="#e9d5ff" opacity="0.8" transform="rotate(157.5)"/>
+    <!-- Center -->
+    <circle cx="0" cy="0" r="32" fill="#f0abfc"/>
+    <circle cx="0" cy="0" r="18" fill="#FAF7F2"/>
+  </g>
+</svg>
