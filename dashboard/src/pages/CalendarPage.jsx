@@ -5,6 +5,19 @@ import PillarBadge from '../components/PillarBadge.jsx'
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
+// Radhika audience engagement score by day-of-week (0=Sun … 6=Sat, Israel-based)
+// Thu/Mon = peak (Israeli audience pre/post Shabbat). Sat = Shabbat (near-zero).
+const HEATMAP_DOW = [0.65, 0.90, 0.72, 0.85, 0.92, 0.58, 0.10]
+const FORMAT_EMOJI = { reel: '🎬', carousel: '🎠', 'quote-tile': '✨', 'single-image': '📸' }
+
+function heatmapTint(dow) {
+  const s = HEATMAP_DOW[dow]
+  if (s >= 0.85) return { bg: '#D6F0E020', border: '#2D6A4F40' }
+  if (s >= 0.65) return { bg: 'transparent', border: '' }
+  if (s >= 0.45) return { bg: '#FFF3CD18', border: '#C9972C30' }
+  return { bg: '#FDE8E415', border: '#9B4D3A30' }
+}
+
 export default function CalendarPage({ active, onCreatePost }) {
   const today = new Date()
   const [year, setYear] = useState(today.getFullYear())
@@ -12,6 +25,8 @@ export default function CalendarPage({ active, onCreatePost }) {
   const [posts, setPosts] = useState([])
   const [selectedDate, setSelectedDate] = useState(null)
   const [selectedPosts, setSelectedPosts] = useState([])
+  const [showHeatmap, setShowHeatmap] = useState(true)
+  const [showGrid, setShowGrid] = useState(false)
 
   // Load posts from localStorage
   useEffect(() => {
@@ -78,6 +93,24 @@ export default function CalendarPage({ active, onCreatePost }) {
         <button onClick={nextMonth} className="btn-ghost" style={{ padding: '0.4rem 0.75rem' }}>→</button>
       </div>
 
+      {/* View toggles */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setShowHeatmap(h => !h)}
+          className="btn-ghost text-xs"
+          style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem', background: showHeatmap ? theme.greenPale : '', color: showHeatmap ? theme.green : theme.mid, border: `1px solid ${showHeatmap ? theme.green : theme.border}` }}
+        >
+          🔥 Best days
+        </button>
+        <button
+          onClick={() => setShowGrid(g => !g)}
+          className="btn-ghost text-xs"
+          style={{ padding: '0.3rem 0.75rem', fontSize: '0.75rem', background: showGrid ? theme.greenPale : '', color: showGrid ? theme.green : theme.mid, border: `1px solid ${showGrid ? theme.green : theme.border}` }}
+        >
+          📸 Grid preview
+        </button>
+      </div>
+
       {/* Day labels */}
       <div className="grid grid-cols-7 mb-1">
         {DAYS.map(d => (
@@ -93,6 +126,8 @@ export default function CalendarPage({ active, onCreatePost }) {
           if (!day) return <div key={`empty-${i}`} />
           const dayPosts = getPostsForDay(day)
           const isSelected = selectedDate === day
+          const dow = (firstDay + day - 1) % 7
+          const tint = showHeatmap && !isSelected && !isToday(day) ? heatmapTint(dow) : { bg: '', border: '' }
           return (
             <button
               key={day}
@@ -100,8 +135,8 @@ export default function CalendarPage({ active, onCreatePost }) {
               style={{
                 minHeight: '64px',
                 borderRadius: '10px',
-                background: isSelected ? theme.greenPale : isToday(day) ? theme.goldPale : 'white',
-                border: `1.5px solid ${isSelected ? theme.green : isToday(day) ? theme.gold : theme.border}`,
+                background: isSelected ? theme.greenPale : isToday(day) ? theme.goldPale : tint.bg || 'white',
+                border: `1.5px solid ${isSelected ? theme.green : isToday(day) ? theme.gold : tint.border || theme.border}`,
                 cursor: 'pointer',
                 padding: '6px 4px',
                 display: 'flex',
@@ -203,6 +238,74 @@ export default function CalendarPage({ active, onCreatePost }) {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* IG Grid Preview */}
+      {showGrid && (
+        <div className="card mt-4 mb-4">
+          <h3 className="font-semibold text-sm mb-1" style={{ color: theme.dark }}>📸 Feed Preview</h3>
+          <p className="text-xs mb-3" style={{ color: theme.muted }}>How your feed will look — newest post top-left</p>
+          {posts.length === 0 ? (
+            <p style={{ color: theme.muted, fontSize: '0.85rem' }}>No saved posts yet. Create and save posts to see your feed preview.</p>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '3px' }}>
+              {posts.slice(0, 9).map((post, i) => {
+                const pillar = getPillar(post.pillar)
+                const emoji = FORMAT_EMOJI[post.format] || '📸'
+                return (
+                  <div
+                    key={post.id || i}
+                    title={post.intent}
+                    style={{
+                      aspectRatio: '1',
+                      borderRadius: '6px',
+                      background: pillar.color + '30',
+                      border: `2px solid ${pillar.color}50`,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '4px',
+                      padding: '6px',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <span style={{ fontSize: '1.4rem' }}>{emoji}</span>
+                    <span style={{ fontSize: '0.55rem', color: pillar.color, fontWeight: 600, textAlign: 'center', lineHeight: 1.2, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+                      {post.intent}
+                    </span>
+                    <span style={{ fontSize: '0.5rem', color: post.status === 'posted' ? theme.green : theme.muted }}>
+                      {post.status === 'posted' ? '✓ Posted' : post.status === 'ready' ? '● Ready' : '○ Draft'}
+                    </span>
+                  </div>
+                )
+              })}
+              {posts.length < 9 && Array.from({ length: 9 - posts.length }).map((_, i) => (
+                <div key={`empty-${i}`} style={{ aspectRatio: '1', borderRadius: '6px', background: theme.creamDark, border: `2px dashed ${theme.border}` }} />
+              ))}
+            </div>
+          )}
+          <p className="text-xs mt-2" style={{ color: theme.muted }}>
+            Tip: Alternate pillar colors for visual variety. Avoid 3 same-color posts in a row.
+          </p>
+        </div>
+      )}
+
+      {/* Heatmap legend */}
+      {showHeatmap && (
+        <div className="flex flex-wrap gap-3 mb-4 mt-2">
+          <span className="text-xs" style={{ color: theme.muted }}>Best days:</span>
+          {DAYS.map((d, i) => {
+            const s = HEATMAP_DOW[i]
+            const label = s >= 0.85 ? 'Peak' : s >= 0.65 ? 'Good' : s >= 0.45 ? 'Avg' : 'Avoid'
+            const color = s >= 0.85 ? theme.green : s >= 0.65 ? theme.mid : s >= 0.45 ? '#C9972C' : '#9B4D3A'
+            return (
+              <span key={d} className="text-xs" style={{ color }}>
+                {d}: {label}
+              </span>
+            )
+          })}
         </div>
       )}
 

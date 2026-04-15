@@ -26,7 +26,7 @@ function truncate(str, max = 2000) {
 async function savePost(post) {
   if (!NOTION_API_KEY || !NOTION_DB_ID) throw new Error('Notion not configured');
 
-  const { id, pillar, format, intent, status = 'draft', result = {}, createdAt } = post;
+  const { id, pillar, format, intent, status = 'draft', result = {}, createdAt, imageUrl } = post;
 
   const enCaption = result.english?.caption_clean || result.english?.caption || '';
   const heCaption = result.hebrew?.caption_clean || result.hebrew?.caption || '';
@@ -50,13 +50,18 @@ async function savePost(post) {
   // Remove undefined properties
   Object.keys(properties).forEach(k => properties[k] === undefined && delete properties[k]);
 
+  const pageBody = {
+    parent: { database_id: NOTION_DB_ID },
+    properties,
+  };
+  if (imageUrl) {
+    pageBody.cover = { type: 'external', external: { url: imageUrl } };
+  }
+
   const res = await fetch('https://api.notion.com/v1/pages', {
     method: 'POST',
     headers: headers(),
-    body: JSON.stringify({
-      parent: { database_id: NOTION_DB_ID },
-      properties,
-    }),
+    body: JSON.stringify(pageBody),
     signal: AbortSignal.timeout(15000),
   });
 
@@ -128,6 +133,7 @@ async function listPosts() {
       format: getText('Format'),
       status: p['Status']?.select?.name || 'draft',
       createdAt: p['Created At']?.date?.start || page.created_time,
+      imageUrl: page.cover?.external?.url || page.cover?.file?.url || null,
       result: {
         english: { caption_clean: getText('EN Caption') },
         hebrew: { caption_clean: getText('HE Caption') },

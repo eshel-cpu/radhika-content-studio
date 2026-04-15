@@ -69,6 +69,19 @@ export default function WaterfallPage({ active, onGoToLibrary }) {
     setOpenSections(s => ({ ...s, [key]: !s[key] }))
   }
 
+  function ViralityBadge({ score, reason }) {
+    if (score == null) return null
+    const color = score >= 80 ? '#2D6A4F' : score >= 60 ? '#C9972C' : '#9B4D3A'
+    const bg = score >= 80 ? '#D6F0E0' : score >= 60 ? '#FFF3CD' : '#FDE8E4'
+    return (
+      <div title={reason || ''} style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: reason ? 'help' : 'default' }}>
+        <span style={{ background: bg, color, borderRadius: '999px', padding: '1px 8px', fontSize: '0.7rem', fontWeight: 700 }}>
+          ⚡ {score}
+        </span>
+      </div>
+    )
+  }
+
   const totalPieces = result
     ? (result.reels?.length || 0) + (result.quote_tiles?.length || 0) +
       (result.stories?.length || 0) + (result.captions?.length || 0)
@@ -241,9 +254,12 @@ export default function WaterfallPage({ active, onGoToLibrary }) {
                     <div key={i} style={{ background: theme.cream, borderRadius: '8px', padding: '0.75rem', border: `1px solid ${theme.border}` }}>
                       <div className="flex items-start justify-between gap-2 mb-2">
                         <p className="text-sm font-medium" style={{ color: theme.dark }}>{reel.clip_description}</p>
-                        <span style={{ background: theme.greenPale, color: theme.green, borderRadius: '999px', padding: '1px 8px', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
-                          {reel.duration_estimate}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+                          <ViralityBadge score={reel.virality_score} reason={reel.virality_reason} />
+                          <span style={{ background: theme.greenPale, color: theme.green, borderRadius: '999px', padding: '1px 8px', fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
+                            {reel.duration_estimate}
+                          </span>
+                        </div>
                       </div>
                       {reel.hook && (
                         <div className="flex items-center justify-between mb-1">
@@ -288,7 +304,10 @@ export default function WaterfallPage({ active, onGoToLibrary }) {
                 <div className="mt-3 space-y-3">
                   {result.quote_tiles.map((qt, i) => (
                     <div key={i} style={{ background: theme.goldPale, borderRadius: '8px', padding: '0.75rem', border: `1px solid ${theme.border}` }}>
-                      <p className="text-sm font-medium mb-1" style={{ color: theme.dark, fontStyle: 'italic' }}>"{qt.quote}"</p>
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <p className="text-sm font-medium" style={{ color: theme.dark, fontStyle: 'italic' }}>"{qt.quote}"</p>
+                        <ViralityBadge score={qt.virality_score} reason={qt.virality_reason} />
+                      </div>
                       <p className="text-xs mb-2" style={{ color: '#8B6914' }}>— {qt.attribution}</p>
                       {qt.visual_note && <p className="text-xs mb-2" style={{ color: theme.muted }}>Design: {qt.visual_note}</p>}
                       <div className="flex gap-2">
@@ -356,7 +375,10 @@ export default function WaterfallPage({ active, onGoToLibrary }) {
                 <div className="mt-3 space-y-3">
                   {result.captions.map((cap, i) => (
                     <div key={i} style={{ background: theme.cream, borderRadius: '8px', padding: '0.75rem', border: `1px solid ${theme.border}` }}>
-                      {cap.hook && <p className="text-xs font-semibold mb-1" style={{ color: theme.terra }}>Hook: {cap.hook}</p>}
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        {cap.hook && <p className="text-xs font-semibold" style={{ color: theme.terra }}>Hook: {cap.hook}</p>}
+                        <ViralityBadge score={cap.virality_score} reason={cap.virality_reason} />
+                      </div>
                       <div className="flex gap-2 mt-2">
                         <button className="btn-ghost flex-1 text-xs" style={{ padding: '0.3rem', fontSize: '0.75rem' }} onClick={() => handleCopy(cap.english, `cap-en-${i}`)}>
                           {copied === `cap-en-${i}` ? '✓' : '🇬🇧 Copy EN'}

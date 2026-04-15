@@ -24,7 +24,10 @@ export default function Header({ activePage, setActivePage }) {
         }}
       >
         {/* Brand */}
-        <div className="flex items-center gap-2">
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => setActivePage('create')}
+        >
           <span style={{ fontSize: '1.4rem' }}>🌸</span>
           <div>
             <span

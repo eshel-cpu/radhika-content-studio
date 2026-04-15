@@ -154,7 +154,9 @@ Return ONLY valid JSON:
       "hook": "3-second opening hook for this Reel",
       "english_caption": "full English caption for this Reel clip",
       "hebrew_caption": "full Hebrew caption for this Reel clip",
-      "duration_estimate": "estimated clip length e.g. 30s, 60s, 90s"
+      "duration_estimate": "estimated clip length e.g. 30s, 60s, 90s",
+      "virality_score": 0-100,
+      "virality_reason": "1-sentence reason: what drives virality for this piece (hook strength, emotional pull, format fit)"
     }
   ],
   "quote_tiles": [
@@ -163,7 +165,9 @@ Return ONLY valid JSON:
       "attribution": "who said it (e.g. Hridayananda Das Goswami, Bhagavad Gita 2.47)",
       "english_caption": "caption to accompany this quote tile",
       "hebrew_caption": "Hebrew caption for this quote tile",
-      "visual_note": "how to design this tile: colors, background, font treatment"
+      "visual_note": "how to design this tile: colors, background, font treatment",
+      "virality_score": 0-100,
+      "virality_reason": "1-sentence reason: what drives virality for this piece"
     }
   ],
   "stories": [
@@ -175,7 +179,9 @@ Return ONLY valid JSON:
     {
       "hook": "standalone hook",
       "english": "full standalone caption (not tied to a clip)",
-      "hebrew": "Hebrew version"
+      "hebrew": "Hebrew version",
+      "virality_score": 0-100,
+      "virality_reason": "1-sentence reason: what drives virality for this piece"
     }
   ],
   "opusclip_note": "Specific OpusClip instructions for this recording: what to look for, which segments to prioritize"

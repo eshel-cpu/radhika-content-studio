@@ -210,7 +210,7 @@ function CanvasTileGenerator({ caption, pillarId }) {
 
 // ─── AI IMAGE GENERATOR (Option B — Ideogram / fal.ai) ────────────────────────
 
-function AIImageGenerator({ visualDirection, pillarId, format, englishCaption }) {
+function AIImageGenerator({ visualDirection, pillarId, format, englishCaption, onImageGenerated }) {
   const [loading, setLoading] = useState(false)
   const [imageUrl, setImageUrl] = useState(null)
   const [error, setError] = useState('')
@@ -246,6 +246,7 @@ function AIImageGenerator({ visualDirection, pillarId, format, englishCaption })
       const data = await res.json()
       setImageUrl(data.url)
       setProvider(data.provider)
+      if (data.url && onImageGenerated) onImageGenerated(data.url)
     } catch (e) {
       setError('Network error — please try again')
     } finally {
@@ -358,7 +359,7 @@ function AIImageGenerator({ visualDirection, pillarId, format, englishCaption })
 
 // ─── MAIN EXPORT — Tabbed wrapper ──────────────────────────────────────────────
 
-export default function ImageGenerator({ result, pillarId, format }) {
+export default function ImageGenerator({ result, pillarId, format, onImageGenerated }) {
   const [tab, setTab] = useState('canvas')
 
   const visualDirection = result?.visual_direction || ''
@@ -419,6 +420,7 @@ export default function ImageGenerator({ result, pillarId, format }) {
           pillarId={pillarId}
           format={format}
           englishCaption={englishCaption}
+          onImageGenerated={onImageGenerated}
         />
       )}
     </div>

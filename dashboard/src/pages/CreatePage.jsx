@@ -39,6 +39,12 @@ export default function CreatePage({ active, onGoToLibrary }) {
   const [copied, setCopied] = useState('')
   const [saving, setSaving] = useState(false)
 
+  // ── Generated image URL (lifted from ImageGenerator)
+  const [generatedImageUrl, setGeneratedImageUrl] = useState(null)
+
+  // ── Inline-edited captions (null = use AI output)
+  const [editedCaptions, setEditedCaptions] = useState({ english: '', hebrew: '' })
+
   async function handleGenerate() {
     if (!pillar || !format || !intent.trim()) return
     setLoading(true)
@@ -58,6 +64,10 @@ export default function CreatePage({ active, onGoToLibrary }) {
       }
       const data = await res.json()
       setResult(data)
+      setEditedCaptions({
+        english: data.english?.caption || data.raw || '',
+        hebrew: data.hebrew?.caption || '',
+      })
       setResultTab('english')
     } catch (e) {
       setError('Network error — please try again')
@@ -75,14 +85,21 @@ export default function CreatePage({ active, onGoToLibrary }) {
 
   async function handleSaveToLibrary() {
     if (!result || saving) return
+    // Merge inline edits into result before saving
+    const mergedResult = {
+      ...result,
+      english: result.english ? { ...result.english, caption: editedCaptions.english } : result.english,
+      hebrew: result.hebrew ? { ...result.hebrew, caption: editedCaptions.hebrew } : result.hebrew,
+    }
     const post = {
       id: Date.now().toString(),
       pillar,
       format,
       intent,
-      result,
+      result: mergedResult,
       status: 'draft',
       createdAt: new Date().toISOString(),
+      imageUrl: generatedImageUrl || undefined,
     }
     setSaving(true)
     try {
@@ -110,6 +127,7 @@ export default function CreatePage({ active, onGoToLibrary }) {
     setIntent('')
     setDraft('')
     setError('')
+    setGeneratedImageUrl(null)
   }
 
   const canGenerate = pillar && format && intent.trim().length > 2
@@ -397,23 +415,29 @@ export default function CreatePage({ active, onGoToLibrary }) {
                 <button
                   className="btn-ghost text-sm"
                   style={{ padding: '0.3rem 0.75rem', fontSize: '0.8rem' }}
-                  onClick={() => handleCopy(result.english?.caption || '', 'en')}
+                  onClick={() => handleCopy(editedCaptions.english, 'en')}
                 >
                   {copied === 'en' ? '✓ Copied!' : '📋 Copy all'}
                 </button>
               </div>
-              <pre
+              <textarea
+                value={editedCaptions.english}
+                onChange={e => setEditedCaptions(prev => ({ ...prev, english: e.target.value }))}
                 style={{
-                  whiteSpace: 'pre-wrap',
+                  width: '100%',
+                  minHeight: '180px',
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  resize: 'vertical',
                   fontFamily: 'DM Sans, sans-serif',
                   fontSize: '0.95rem',
                   color: theme.dark,
                   lineHeight: 1.7,
                   margin: 0,
+                  padding: 0,
                 }}
-              >
-                {result.english?.caption || result.raw}
-              </pre>
+              />
               {result.english?.caption_clean && (
                 <>
                   <div style={{ borderTop: `1px solid ${theme.border}`, margin: '1rem 0' }} />
@@ -443,24 +467,31 @@ export default function CreatePage({ active, onGoToLibrary }) {
                 <button
                   className="btn-ghost text-sm"
                   style={{ padding: '0.3rem 0.75rem', fontSize: '0.8rem' }}
-                  onClick={() => handleCopy(result.hebrew?.caption || '', 'he')}
+                  onClick={() => handleCopy(editedCaptions.hebrew, 'he')}
                 >
                   {copied === 'he' ? '✓ Copied!' : '📋 Copy all'}
                 </button>
               </div>
-              <pre
-                className="rtl"
+              <textarea
+                value={editedCaptions.hebrew}
+                onChange={e => setEditedCaptions(prev => ({ ...prev, hebrew: e.target.value }))}
+                dir="rtl"
                 style={{
-                  whiteSpace: 'pre-wrap',
+                  width: '100%',
+                  minHeight: '180px',
+                  background: 'transparent',
+                  border: 'none',
+                  outline: 'none',
+                  resize: 'vertical',
                   fontFamily: 'DM Sans, Arial Hebrew, sans-serif',
                   fontSize: '1rem',
                   color: theme.dark,
                   lineHeight: 1.8,
                   margin: 0,
+                  padding: 0,
+                  textAlign: 'right',
                 }}
-              >
-                {result.hebrew?.caption}
-              </pre>
+              />
               {result.hebrew?.caption_clean && (
                 <>
                   <div style={{ borderTop: `1px solid ${theme.border}`, margin: '1rem 0' }} />
@@ -631,7 +662,7 @@ export default function CreatePage({ active, onGoToLibrary }) {
           )}
 
           {/* Image Generator */}
-          <ImageGenerator result={result} pillarId={pillar} format={format} />
+          <ImageGenerator result={result} pillarId={pillar} format={format} onImageGenerated={setGeneratedImageUrl} />
 
           {/* Action row */}
           <div className="flex gap-3 mt-6">

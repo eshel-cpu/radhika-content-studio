@@ -277,6 +277,25 @@ export default function LibraryPage({ active }) {
                       )}
                     </div>
 
+                    {/* Generated image */}
+                    {post.imageUrl && (
+                      <div className="mb-3">
+                        <img
+                          src={post.imageUrl}
+                          alt="Generated"
+                          style={{
+                            width: '100%',
+                            maxWidth: '280px',
+                            height: 'auto',
+                            borderRadius: '8px',
+                            border: `1px solid ${theme.border}`,
+                            display: 'block',
+                            margin: '0 auto',
+                          }}
+                        />
+                      </div>
+                    )}
+
                     {/* Caption preview */}
                     {post.result?.english?.caption_clean && (
                       <div style={{
