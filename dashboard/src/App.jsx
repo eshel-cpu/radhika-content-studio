@@ -6,6 +6,7 @@ import CalendarPage from './pages/CalendarPage.jsx'
 import WaterfallPage from './pages/WaterfallPage.jsx'
 import LibraryPage from './pages/LibraryPage.jsx'
 import GSBPage from './pages/GSBPage.jsx'
+import HelpPage from './pages/HelpPage.jsx'
 
 export default function App() {
   const [authed, setAuthed] = useState(!!localStorage.getItem('radhikaToken'))
@@ -18,7 +19,7 @@ export default function App() {
       const tag = e.target?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target?.isContentEditable) return
       if (e.metaKey || e.ctrlKey || e.altKey) return
-      const map = { c: 'create', k: 'calendar', w: 'waterfall', l: 'library', g: 'gsb' }
+      const map = { c: 'create', k: 'calendar', w: 'waterfall', l: 'library', g: 'gsb', '?': 'help' }
       if (map[e.key]) { e.preventDefault(); setActivePage(map[e.key]) }
     }
     window.addEventListener('keydown', onKey)
@@ -49,6 +50,9 @@ export default function App() {
         </div>
         <div style={{ display: activePage === 'gsb' ? 'block' : 'none' }}>
           <GSBPage active={activePage === 'gsb'} />
+        </div>
+        <div style={{ display: activePage === 'help' ? 'block' : 'none' }}>
+          <HelpPage />
         </div>
       </main>
     </div>

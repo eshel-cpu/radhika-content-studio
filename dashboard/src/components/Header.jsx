@@ -9,6 +9,7 @@ const TABS = [
   { id: 'waterfall', label: 'Waterfall', emoji: '🌊', shortcut: 'w' },
   { id: 'library',   label: 'Library',   emoji: '📚', shortcut: 'l' },
   { id: 'gsb',       label: 'GSB',       emoji: '📊', shortcut: 'g' },
+  { id: 'help',      label: 'Help',      emoji: '❓', shortcut: '?' },
 ]
 
 export default function Header({ activePage, setActivePage }) {
